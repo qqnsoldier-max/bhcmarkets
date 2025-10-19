@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    ".": "./src/index.ts",
+    "./components/*": "./src/components/*.tsx",
+    "./theme/*": "./src/theme/*"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -21,6 +23,7 @@
   },
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "styled-components": "^6.1.19"
   }
 }
