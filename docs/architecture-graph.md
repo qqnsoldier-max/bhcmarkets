@@ -1,110 +1,217 @@
-## High-Level Overview (Abstracted)
+# System Architecture (Repo-Aligned, Domain-Abstracted)
 
+This diagram reflects the actual packages and apps in this monorepo, keeping business logic abstract while showing your technical design: multi-client frontends, HTTP API, realtime gateway, market data ingestion, Redis cache + BullMQ, PostgreSQL, and a background worker.
 
 ```mermaid
-graph TD
-    %% 1. Define Nodes & Relationships
-    A1[Third-Party Data API 1] --> B1
-    A2[Third-Party Data API 2] --> B1
-    A3[Third-Party Data API 3] --> B1
+flowchart TD
 
-    B1[Data Ingestion Service] --> B2[Data Processor]  --> B3[Real-time Cache (Redis)]
-    B3 --> B4[WebSocket Service]
+  %% ======================
+  %% Clients (apps/*)
+  %% ======================
+  subgraph Clients
+    C1["Platform Web (apps/platform)"]
+    C2["Admin (apps/admin)"]
+    C3["Mobile (apps/mobile)"]
+  end
 
-    B4 -->|WebSocket| D1[Main Web App (React)]
-    B4 -->|WebSocket| D2[Admin Dashboard (React)]
+  %% ======================
+  %% Edge (docker/nginx)
+  %% ======================
+  Edge["Nginx / Edge Router"]
 
-    D1 -->|REST / WS| C1[API Gateway (Fastify/Express)]
-    D2 -->|REST / WS| C1
+  %% ======================
+  %% Backend (packages/backend)
+  %% ======================
+  subgraph Backend
+    API["HTTP API Layer (packages/backend/src/api)"]
+    Domains["Domain Services (packages/backend/src/domains/*)"]
+    DBAccess["Database Access (Prisma)"]
+    RT["Realtime Gateway - WebSocket (packages/backend/src/realtime/gateway.ts)"]
+    Notifier["User Notifier (packages/backend/src/realtime/userNotifier.ts)"]
+    Broadcaster["Price Broadcaster (packages/backend/src/realtime/priceBroadcaster.ts)"]
 
-    C1 --> C2[Core Service 1] --> C4[Core Service 3] --> C5[SQL Database (PostgreSQL)]
-    C1 --> C3[Core Service 2] --> C5
-    C1 -->|Push real-time data| B4
-
-    C6[Async Job Worker (BullMQ)] -->|Async DB updates| C5
-    C6 -->|Push job results to cache| B3
-
-    %% 2. Group into Subgraphs
-    subgraph External Data Sources
-        A1
-        A2
-        A3
+    subgraph Market_Data
+      Sched["Scheduler (market-data/scheduler.ts)"]
+      Fetch["Fetcher (market-data/fetcher.ts)"]
+      Adapt["Adapters (market-data/adapters/*)"]
+      Cache["Local Cache (market-data/cache.ts)"]
     end
+  end
 
-    subgraph Data Pipeline
-        B1
-        B2
-        B3
-        B4
-    end
+  %% ======================
+  %% Async / Workers (packages/worker)
+  %% ======================
+  subgraph Async_and_Workers
+    Q["Redis Queue (BullMQ)"]
+    W["Worker (packages/worker)"]
+    J1["Market Data Job"]
+    J2["Analytics/Calculation Job"]
+  end
 
-    subgraph Core Backend API
-        C1
-        C2
-        C3
-        C4
-        C5
-        C6
-    end
+  %% ======================
+  %% Data Stores
+  %% ======================
+  subgraph Data_Stores
+    Redis[("Redis")]
+    PG[("PostgreSQL")]
+  end
 
-    subgraph Client Frontends
-        D1
-        D2
-    end
+  %% ======================
+  %% External Providers
+  %% ======================
+  subgraph External_Providers
+    P1["Provider A"]
+    P2["Provider B"]
+  end
+
+  %% ======================
+  %% Client <-> Edge <-> Backend
+  %% ======================
+  C1 -->|REST| Edge
+  C2 -->|REST| Edge
+  C3 -->|REST| Edge
+  Edge --> API
+  C1 <-->|WebSocket| RT
+  C2 <-->|WebSocket| RT
+
+  %% ======================
+  %% Backend <-> Stores
+  %% ======================
+  API --> Domains
+  Domains --> DBAccess
+  DBAccess --> PG
+  API <--> Redis
+
+  %% ======================
+  %% Realtime
+  %% ======================
+  Broadcaster -.-> RT
+  Notifier -.-> RT
+
+  %% ======================
+  %% Jobs / Queue
+  %% ======================
+  API -->|enqueue| Q
+  Q --> W
+  W -->|persist results| PG
+  W -->|publish events| Redis
+  W --> J1
+  W --> J2
+  Redis -.-> Notifier
+
+  %% ======================
+  %% Market Data Flow
+  %% ======================
+  Sched --> Fetch
+  Fetch --> Adapt
+  Adapt -->|HTTP requests| P1
+  Adapt -->|HTTP requests| P2
+  Fetch -->|normalized data| Cache
+  Cache --> Redis
+  Redis -.-> Broadcaster
 ```
 
------
+## Runtime Flows
 
-## 🗄️ Data Persistence Model (Abstracted)
+### A) Realtime Market Data Pipeline
+```mermaid
+sequenceDiagram
+  autonumber
+  participant S as Scheduler (backend/market-data)
+  participant F as Fetcher
+  participant A as Adapter
+  participant P as External Provider
+  participant R as Redis
+  participant B as Broadcaster
+  participant G as Realtime Gateway (WS)
+  participant C as Client
 
-This ERD shows you know how to model data with relationships, but it generalizes "Orders" and "Trades" into "Transactions," and "PNL" into "Analytics." This is a common pattern in many applications (like e-commerce, logging, etc.) and is much less revealing.
+  S->>F: tick()
+  F->>A: requestData()
+  A->>P: HTTP request(s)
+  P-->>A: raw data
+  A-->>F: normalized data
+  F->>R: set/publish latest snapshot
+  R-->>B: pub/sub event
+  B-->>G: push update
+  G-->>C: WS: realtime data
+```
 
-**Pro-tip:** For showing off *dev skills*, the architecture diagram above is often more powerful than a database schema. You might consider only showing that first diagram.
+### B) User Operation with Async Processing and Realtime Notify
+```mermaid
+sequenceDiagram
+  autonumber
+  participant C as Client
+  participant E as Edge (Nginx)
+  participant A as API
+  participant D as DB (PostgreSQL)
+  participant Q as Queue (BullMQ on Redis)
+  participant W as Worker
+  participant R as Redis
+  participant N as Notifier
+  participant G as Realtime Gateway (WS)
+
+  C->>E: POST /api/operation
+  E->>A: forward
+  A->>D: persist initial record
+  A->>Q: enqueue job
+  A-->>C: 202 Accepted
+
+  Q-->>W: dispatch job
+  W->>D: compute & persist results
+  W->>R: publish event
+  R-->>N: pub/sub event
+  N-->>G: notify user(s)
+  G-->>C: WS: operation result/update
+```
+
+## Optional, Resume-Safe Abstracted View
+Use this version publicly if you want to fully hide domain modules (orders/trades/etc.) while keeping your technical strengths clear.
 
 ```mermaid
-erDiagram
-    USER ||--o{ ACCOUNT : owns
-    ACCOUNT ||--o{ TRANSACTION : creates
-    TRANSACTION ||--|{ TRANSACTION_DETAIL : leads_to
-    TRANSACTION_DETAIL ||--|{ ANALYTICS_RECORD : generates
+flowchart TD
+  subgraph Clients
+    W["Web App"]
+    A["Admin App"]
+    M["Mobile Client"]
+  end
 
-    USER {
-      int id
-      string email
-      string hashed_password
-      datetime created_at
-    }
+  Edge["API Gateway / Edge Router"]
 
-    ACCOUNT {
-      int id
-      int user_id
-      decimal balance
-      string status
-      datetime created_at
-    }
+  subgraph Services
+    API["HTTP API"]
+    RT["Realtime Gateway (WebSocket)"]
+    Q["Async Queue (BullMQ)"]
+    WK["Worker"]
+    MD["Data Pipeline (Scheduler/Fetcher/Adapters)"]
+  end
 
-    TRANSACTION {
-      int id
-      int account_id
-      string type
-      string status
-      decimal amount
-      datetime created_at
-    }
+  subgraph Data_Stores
+    Cache[("Redis: cache, pub-sub, queue")]
+    SQL[("PostgreSQL")]
+  end
 
-    TRANSACTION_DETAIL {
-      int id
-      int transaction_id
-      string description
-      decimal executed_value
-      datetime executed_at
-    }
+  subgraph External_Providers
+    X1["Provider A"]
+    X2["Provider B"]
+  end
 
-    ANALYTICS_RECORD {
-      int id
-      int detail_id
-      string metric_name
-      decimal metric_value
-      datetime calculated_at
-    }
+  W -->|REST| Edge
+  Edge --> API
+  A -->|REST| Edge
+  M -->|REST| Edge
+  W <-->|WS| RT
+  A <-->|WS| RT
+
+  API --> SQL
+  API <--> Cache
+  API --> Q
+  Q --> WK
+  WK --> SQL
+  WK --> Cache
+
+  MD --> Cache
+  MD --> X1
+  MD --> X2
+  Cache -.-> RT
 ```
