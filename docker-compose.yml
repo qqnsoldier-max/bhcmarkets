@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+	postgres:
+		image: postgres:16
+		environment:
+			POSTGRES_USER: bhc
+			POSTGRES_PASSWORD: bhc
+			POSTGRES_DB: bhc
+		ports:
+			- "5432:5432"
+		volumes:
+			- pgdata:/var/lib/postgresql/data
+		healthcheck:
+			test: ["CMD", "pg_isready", "-U", "bhc"]
+			interval: 5s
+			timeout: 5s
+			retries: 5
+
+	redis:
+		image: redis:7
+		ports:
+			- "6379:6379"
+		command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+		volumes:
+			- ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
+
+	backend:
+		build: ./packages/backend
+		command: ["node", "dist/index.js"]
+		environment:
+			NODE_ENV: development
+			PORT: 4000
+			DATABASE_URL: postgresql://bhc:bhc@postgres:5432/bhc
+			REDIS_URL: redis://redis:6379
+		depends_on:
+			postgres:
+				condition: service_healthy
+			redis:
+				condition: service_started
+		ports:
+			- "4000:4000"
+		volumes:
+			- ./packages/backend:/app
+
+volumes:
+	pgdata:
+

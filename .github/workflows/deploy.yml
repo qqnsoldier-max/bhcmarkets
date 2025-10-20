@@ -1,0 +1,11 @@
+name: Deploy (placeholder)
+
+on:
+	workflow_dispatch:
+
+jobs:
+	noop:
+		runs-on: ubuntu-latest
+		steps:
+			- run: echo "Deployment workflow to be defined (environments, containers, migrations)."
+
