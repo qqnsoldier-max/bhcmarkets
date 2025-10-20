@@ -79,6 +79,7 @@ High-level overview is in `docs/architecture.md`. A short version:
 - Flat ESLint config lives in `packages/eslint-config/*`; apps/packages extend it.
 - TypeScript base config is in `packages/typescript-config/*`.
 - CI runs lint and type checks on PRs. See `.github/workflows/ci.yml`.
+- Architecture docs: see `docs/architecture.md`, `docs/domain-overview.md`, `docs/api-contracts.md`, `docs/events.md`, `docs/errors.md`, and `docs/security.md`.
 
 ## Contributing
 

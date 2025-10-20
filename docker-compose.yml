@@ -25,7 +25,9 @@ services:
 			- ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
 
 	backend:
-		build: ./packages/backend
+		build:
+			context: .
+			dockerfile: packages/backend/Dockerfile
 		command: ["node", "dist/index.js"]
 		environment:
 			NODE_ENV: development

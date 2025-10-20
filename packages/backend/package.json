@@ -7,14 +7,17 @@
   "scripts": {
     "dev": "node src/index.ts",
     "build": "tsc --project tsconfig.json",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check-types": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
-    "@repo/utils": "*"
+    "@repo/utils": "*",
+    "@repo/types": "*"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@types/node": "^22.7.8",
     "typescript": "5.9.2"
   }
 }

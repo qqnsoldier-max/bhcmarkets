@@ -1,4 +1,4 @@
-export type UUID = string;
+import type { UUID } from "./trading";
 
 export type UserStatus = "active" | "pending" | "suspended" | "deleted";
 export type UserRole = "user" | "admin" | "support";

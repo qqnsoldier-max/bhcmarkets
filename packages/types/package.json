@@ -1,0 +1,13 @@
+{
+  "name": "@repo/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./market": "./market.ts",
+    "./trading": "./trading.ts",
+    "./user": "./user.ts"
+  },
+  "types": "./index.ts"
+}
