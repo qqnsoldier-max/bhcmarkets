@@ -69,11 +69,10 @@ type AuthMode = "login" | "signup";
 
 export const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
-  const navigate = useNavigate();
 
   const handleAuthSuccess = () => {
     // Redirect to dashboard after successful auth
-    navigate("/");
+    window.location.href = "/";
   };
 
   return (

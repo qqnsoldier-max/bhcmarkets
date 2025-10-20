@@ -3,7 +3,7 @@ import { ThemeProvider } from "styled-components";
 import { defaultPalette, paletteOrder, palettes, PaletteName } from "./palettes";
 import { ThemePickerContext } from "./ThemeContext";
 import { createTokenTheme } from "./tokens";
-import { GlobalStyle } from "./GlobalStyle";
+import GlobalStyle from "./GlobalStyle";
 
 export type ThemeManagerProps = PropsWithChildren<{
   initialPalette?: PaletteName;
