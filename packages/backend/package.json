@@ -12,12 +12,16 @@
   },
   "dependencies": {
     "@repo/utils": "*",
-    "@repo/types": "*"
+    "@repo/types": "*",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "pg": "^8.12.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/node": "^22.7.8",
+    "@types/pg": "^8.11.10",
     "typescript": "5.9.2"
   }
 }
