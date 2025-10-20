@@ -6,9 +6,11 @@ import { MarketsPage } from "../features/markets/MarketsPage";
 import { OrdersPage } from "../features/orders/OrdersPage";
 import { SettingsPage } from "../features/settings/SettingsPage";
 import { UiGalleryPage } from "../features/ui-gallery/UiGalleryPage";
+import { AuthPage } from "../features/auth/AuthPage";
 
 export const App = () => (
   <Routes>
+    <Route path="/auth" element={<AuthPage />} />
     <Route element={<DashboardShell />}>
       <Route index element={<DashboardOverviewPage />} />
       <Route path="portfolio" element={<PortfolioPage />} />

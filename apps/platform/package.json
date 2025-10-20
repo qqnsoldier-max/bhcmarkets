@@ -11,6 +11,7 @@
     "check-types": "tsc -b"
   },
   "dependencies": {
+    "@repo/api-client": "*",
     "@repo/ui": "*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

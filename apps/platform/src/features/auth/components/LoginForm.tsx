@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import styled from "styled-components";
 import { Button, TextField } from "@repo/ui";
-import { createAuthClient, type RegisterRequest } from "@repo/api-client";
+import { createAuthClient, type LoginRequest } from "@repo/api-client";
 
 const Form = styled.form`
   display: flex;
@@ -28,15 +28,14 @@ const SuccessMessage = styled.div`
   font-size: ${({ theme }) => theme.typography.sizes.sm};
 `;
 
-export interface RegisterFormProps {
+export interface LoginFormProps {
   onSuccess?: () => void;
-  onSwitchToLogin?: () => void;
+  onSwitchToSignup?: () => void;
 }
 
-export const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) => {
+export const LoginForm = ({ onSuccess, onSwitchToSignup }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -47,37 +46,20 @@ export const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     e.preventDefault();
     setError(null);
     setSuccess(false);
-
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    // Validate password strength
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const registerData: RegisterRequest = {
+      const loginData: LoginRequest = {
         email: email.trim(),
         password,
-        issueSession: true, // Request to create a session immediately
       };
 
-      const result = await authClient.register(registerData);
+      const result = await authClient.login(loginData);
       
-      // Check if session was issued
-      if ("tokens" in result) {
-        // Store tokens in localStorage
-        localStorage.setItem("accessToken", result.tokens.accessToken);
-        localStorage.setItem("refreshToken", result.tokens.refreshToken);
-        localStorage.setItem("user", JSON.stringify(result.user));
-      }
+      // Store tokens in localStorage (in production, consider more secure storage)
+      localStorage.setItem("accessToken", result.tokens.accessToken);
+      localStorage.setItem("refreshToken", result.tokens.refreshToken);
+      localStorage.setItem("user", JSON.stringify(result.user));
       
       setSuccess(true);
       
@@ -88,7 +70,7 @@ export const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         }, 500);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -97,7 +79,7 @@ export const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
   return (
     <Form onSubmit={handleSubmit}>
       {error && <ErrorMessage>{error}</ErrorMessage>}
-      {success && <SuccessMessage>Registration successful! Redirecting...</SuccessMessage>}
+      {success && <SuccessMessage>Login successful! Redirecting...</SuccessMessage>}
 
       <TextField
         id="email"
@@ -108,7 +90,6 @@ export const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         onChange={(e) => setEmail(e.target.value)}
         required
         disabled={loading}
-        helperText="We'll never share your email with anyone else."
       />
 
       <TextField
@@ -120,31 +101,19 @@ export const RegisterForm = ({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         onChange={(e) => setPassword(e.target.value)}
         required
         disabled={loading}
-        helperText="Minimum 8 characters"
-      />
-
-      <TextField
-        id="confirmPassword"
-        type="password"
-        label="Confirm Password"
-        placeholder="••••••••"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-        disabled={loading}
       />
 
       <Button type="submit" disabled={loading}>
-        {loading ? "Creating account..." : "Sign Up"}
+        {loading ? "Logging in..." : "Log In"}
       </Button>
 
-      {onSwitchToLogin && (
-        <Button type="button" variant="subtle" onClick={onSwitchToLogin} disabled={loading}>
-          Already have an account? Log in
+      {onSwitchToSignup && (
+        <Button type="button" variant="subtle" onClick={onSwitchToSignup} disabled={loading}>
+          Don't have an account? Sign up
         </Button>
       )}
     </Form>
   );
 };
 
-export default RegisterForm;
+export default LoginForm;
