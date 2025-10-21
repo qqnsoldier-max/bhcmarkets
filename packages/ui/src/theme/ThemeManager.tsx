@@ -1,9 +1,18 @@
 import { PropsWithChildren, useMemo, useState } from "react";
 import { ThemeProvider } from "styled-components";
-import { defaultPalette, paletteOrder, palettes, PaletteName } from "./palettes";
+import type {} from "styled-components";
+import { defaultPalette, paletteOrder, palettes } from "./palettes";
 import { ThemePickerContext } from "./ThemeContext";
 import { createTokenTheme } from "./tokens";
 import GlobalStyle from "./GlobalStyle";
+
+// Augment styled-components' DefaultTheme with our token theme type
+declare module "styled-components" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface DefaultTheme extends ReturnType<typeof createTokenTheme> {}
+}
+
+type PaletteName = keyof typeof palettes;
 
 export type ThemeManagerProps = PropsWithChildren<{
   initialPalette?: PaletteName;
@@ -25,7 +34,7 @@ export const ThemeManager = ({ initialPalette = defaultPalette, children }: Them
   const options = useMemo(
     () =>
       paletteOrder
-        .filter((key) => palettes[key])
+        .filter((key): key is PaletteName => key in palettes)
         .map((key) => ({ value: key, label: formatPaletteLabel(key) })),
     []
   );
