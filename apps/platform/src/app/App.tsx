@@ -10,8 +10,9 @@ import { AuthPage } from "../features/auth/AuthPage";
 
 export const App = () => (
   <Routes>
-    <Route path="/auth" element={<AuthPage />} />
-    <Route element={<DashboardShell />}>
+  <Route path="/auth" element={<AuthPage />} />
+  <Route path="/auth/*" element={<AuthPage />} />
+    <Route path="/app" element={<DashboardShell />}>
       <Route index element={<DashboardOverviewPage />} />
       <Route path="portfolio" element={<PortfolioPage />} />
       <Route path="markets" element={<MarketsPage />} />
@@ -19,7 +20,8 @@ export const App = () => (
       <Route path="settings" element={<SettingsPage />} />
     </Route>
     <Route path="/ui" element={<UiGalleryPage />} />
-    <Route path="*" element={<Navigate to="/" replace />} />
+    <Route path="/" element={<Navigate to="/auth" replace />} />
+    <Route path="*" element={<Navigate to="/auth" replace />} />
   </Routes>
 );
 

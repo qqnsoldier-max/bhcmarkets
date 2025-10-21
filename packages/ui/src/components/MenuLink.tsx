@@ -1,14 +1,17 @@
-import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type AnchorHTMLAttributes, type ElementType, type ReactNode } from "react";
 import styled, { css } from "styled-components";
-import type { DefaultTheme, FlattenSimpleInterpolation } from "styled-components";
+import type { DefaultTheme } from "styled-components";
 
 type MenuLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   icon?: ReactNode;
   label: ReactNode;
   active?: boolean;
+  as?: ElementType;
+  to?: string;
+  end?: boolean;
 };
 
-const getActiveStyles = (theme: DefaultTheme): FlattenSimpleInterpolation => css`
+const getActiveStyles = (theme: DefaultTheme): ReturnType<typeof css> => css`
   color: ${theme.colors.text.primary};
   background: ${theme.gradients.primarySoft};
   box-shadow: inset 0 0 0 1px ${theme.colors.border.accent};

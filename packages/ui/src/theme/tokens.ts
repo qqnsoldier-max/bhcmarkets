@@ -1,4 +1,4 @@
-import { defaultPalette, getPalette, PaletteName } from "./palettes";
+import { defaultPalette, getPalette, type Palette, type PaletteName } from "./palettes";
 
 export const toRgba = (hex: string | undefined, alpha: number) => {
   if (!hex) {
@@ -40,7 +40,7 @@ export type TokenSpacingScale = Record<
 
 export type TokenRadii = Record<"xs" | "sm" | "md" | "lg" | "xl" | "pill", string>;
 
-const buildColorTokens = (baseColors: Record<string, string>) => ({
+const buildColorTokens = (baseColors: Palette) => ({
   ...baseColors,
   text: {
     primary: baseColors.neutral50,
@@ -72,7 +72,7 @@ const buildColorTokens = (baseColors: Record<string, string>) => ({
   focus: toRgba(baseColors.primary, 0.22),
 });
 
-const buildGradientTokens = (baseColors: Record<string, string>) => {
+const buildGradientTokens = (baseColors: Palette) => {
   const primaryHover = baseColors.primaryHover || baseColors.primary;
   const accentHover = baseColors.accentHover || baseColors.accent;
 

@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import styled from "styled-components";
 import { Badge, Button, MenuLink } from "@repo/ui";
 
@@ -79,12 +79,14 @@ const Content = styled.div`
   margin: 0 auto;
 `;
 
+const DASHBOARD_ROOT = "/app" as const;
+
 const menuItems = [
-  { label: "Overview", to: "/", icon: "🏠" },
-  { label: "Portfolio", to: "/portfolio", icon: "💼" },
-  { label: "Markets", to: "/markets", icon: "📈" },
-  { label: "Orders", to: "/orders", icon: "🧾" },
-  { label: "Settings", to: "/settings", icon: "⚙️" },
+  { label: "Overview", to: DASHBOARD_ROOT, icon: "🏠" },
+  { label: "Portfolio", to: `${DASHBOARD_ROOT}/portfolio`, icon: "💼" },
+  { label: "Markets", to: `${DASHBOARD_ROOT}/markets`, icon: "📈" },
+  { label: "Orders", to: `${DASHBOARD_ROOT}/orders`, icon: "🧾" },
+  { label: "Settings", to: `${DASHBOARD_ROOT}/settings`, icon: "⚙️" },
 ] as const;
 
 export const DashboardShell = () => (
@@ -103,7 +105,7 @@ export const DashboardShell = () => (
               key={item.to}
               as={NavLink}
               to={item.to}
-              end={item.to === "/"}
+              end={item.to === DASHBOARD_ROOT}
               label={item.label}
               icon={item.icon}
             />

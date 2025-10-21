@@ -10,6 +10,10 @@ if (!rootElement) {
   throw new Error("Root element with id 'root' was not found");
 }
 
+if (import.meta.env.VITE_API_BASE) {
+  (window as unknown as { __API_BASE?: string }).__API_BASE = import.meta.env.VITE_API_BASE;
+}
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ThemeManager>

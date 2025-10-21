@@ -126,20 +126,23 @@ export const palettes = {
     neutral900: "#121519",
   },
 };
-    
 
-export const paletteOrder = ["darkFinance", "corporateBlue", "heritageDark", "darkGlow", "monoDark"]; 
+export type PaletteMap = typeof palettes;
+export type PaletteName = keyof PaletteMap;
+export type Palette = PaletteMap[PaletteName];
 
-export const defaultPalette = "corporateBlue";
+export const paletteOrder: PaletteName[] = ["darkFinance", "corporateBlue", "heritageDark", "darkGlow", "monoDark"];
 
-let activePaletteName = defaultPalette;
+export const defaultPalette: PaletteName = "corporateBlue";
 
-export const setActivePalette = (name) => {
+let activePaletteName: PaletteName = defaultPalette;
+
+export const setActivePalette = (name: PaletteName) => {
   if (palettes[name]) {
     activePaletteName = name;
   }
 };
 
-export const getPalette = (name = activePaletteName) => ({
+export const getPalette = (name: PaletteName = activePaletteName): Palette => ({
   ...palettes[name],
 });

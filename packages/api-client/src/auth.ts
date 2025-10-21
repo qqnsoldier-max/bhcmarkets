@@ -87,7 +87,7 @@ const inferBaseUrl = (): string => {
 		if (fromWindow) return fromWindow;
 		return `${window.location.origin}`;
 	}
-	return "http://localhost:4000";
+	return "http://localhost:5174";
 };
 
 export function createAuthClient(options: AuthClientOptions = {}) {

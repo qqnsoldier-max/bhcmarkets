@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { Card, CardBody, CardHeader, CardTitle } from "@repo/ui";
+import { useNavigate } from "react-router-dom";
+import { Card, CardBody, CardHeader } from "@repo/ui";
 import { LoginForm } from "./components/LoginForm";
 import { RegisterForm } from "./components/RegisterForm";
 
@@ -11,12 +11,15 @@ const PageContainer = styled.div`
   align-items: center;
   justify-content: center;
   padding: ${({ theme }) => theme.spacing.lg};
-  background: ${({ theme }) => theme.colors.backgrounds.base};
+  background: ${({ theme }) => theme.gradients.primarySoft};
 `;
 
 const AuthCard = styled(Card)`
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
+  backdrop-filter: blur(18px);
+  background: ${({ theme }) => theme.colors.backgrounds.surface};
+  box-shadow: ${({ theme }) => theme.elevations.overlay};
 `;
 
 const TabContainer = styled.div`
@@ -51,28 +54,28 @@ const Logo = styled.div`
 
 const LogoText = styled.h1`
   margin: 0;
-  font-size: ${({ theme }) => theme.typography.sizes.xxl};
+  font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: ${({ theme }) => theme.typography.weightBold};
-  background: ${({ theme }) => theme.gradients.primary};
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.48);
 `;
 
 const Subtitle = styled.p`
   margin: ${({ theme }) => theme.spacing.xs} 0 0;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.typography.sizes.sm};
+  opacity: 0.9;
 `;
 
 type AuthMode = "login" | "signup";
 
 export const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
+  const navigate = useNavigate();
 
   const handleAuthSuccess = () => {
-    // Redirect to dashboard after successful auth
-    window.location.href = "/";
+    // Redirect to dashboard after successful auth without full reload
+    navigate("/app", { replace: true });
   };
 
   return (
