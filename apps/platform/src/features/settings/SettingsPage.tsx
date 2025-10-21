@@ -1,11 +1,14 @@
+import { useState } from "react";
 import styled from "styled-components";
 import {
   Badge,
+  Button,
   Card,
   CardBody,
   CardHeader,
   CardSubtitle,
   CardTitle,
+  Divider,
   Toggle,
 } from "@repo/ui";
 
@@ -15,6 +18,13 @@ const Page = styled.div`
 `;
 
 const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing.lg};
+`;
+
+const HeaderContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.xs};
@@ -40,6 +50,11 @@ const SettingRow = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
+  padding: ${({ theme }) => theme.spacing.md} 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.subtle};
+  }
 `;
 
 const SettingLabel = styled.div`
@@ -50,61 +65,169 @@ const SettingLabel = styled.div`
 
 const SettingTitle = styled.span`
   font-weight: ${({ theme }) => theme.typography.weightMedium};
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const SettingDescription = styled.span`
   color: ${({ theme }) => theme.colors.text.tertiary};
+  font-size: ${({ theme }) => theme.typography.sizes.sm};
 `;
 
-export const SettingsPage = (): JSX.Element => (
-  <Page>
-    <Header>
-      <Title>Settings</Title>
-      <Subtitle>Control preferences and platform-level flags.</Subtitle>
-    </Header>
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.sm};
+`;
 
-    <Grid>
-      <Card>
-        <CardHeader>
-          <div>
-            <CardTitle>Notifications</CardTitle>
-            <CardSubtitle>Realtime alerts and briefings</CardSubtitle>
-          </div>
-          <Badge variant="accent">Beta</Badge>
-        </CardHeader>
-        <CardBody>
-          <SettingRow>
-            <SettingLabel>
-              <SettingTitle>Desktop alerts</SettingTitle>
-              <SettingDescription>Pops toast notifications for fills and risk breaches.</SettingDescription>
-            </SettingLabel>
-            <Toggle checked readOnly aria-label="Desktop alerts enabled" />
-          </SettingRow>
-          <SettingRow>
-            <SettingLabel>
-              <SettingTitle>Daily digest</SettingTitle>
-              <SettingDescription>Email summary of PnL and exposures.</SettingDescription>
-            </SettingLabel>
-            <Toggle checked={false} readOnly aria-label="Daily digest disabled" />
-          </SettingRow>
-        </CardBody>
-      </Card>
+export const SettingsPage = (): JSX.Element => {
+  const [desktopAlerts, setDesktopAlerts] = useState(true);
+  const [dailyDigest, setDailyDigest] = useState(false);
+  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
+  const [tradingNotifications, setTradingNotifications] = useState(true);
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Workspace</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <SettingLabel>
-            <SettingTitle>Theme overrides</SettingTitle>
-            <SettingDescription>
-              Hook up advanced theming controls from the design token panel.
-            </SettingDescription>
-          </SettingLabel>
-        </CardBody>
-      </Card>
-    </Grid>
-  </Page>
-);
+  return (
+    <Page>
+      <Header>
+        <HeaderContent>
+          <Title>Settings</Title>
+          <Subtitle>Manage your account preferences and platform configuration</Subtitle>
+        </HeaderContent>
+        <Button variant="primary">Save Changes</Button>
+      </Header>
+
+      <Grid>
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Account & Security</CardTitle>
+              <CardSubtitle>Manage your account security settings</CardSubtitle>
+            </div>
+          </CardHeader>
+          <CardBody>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Two-Factor Authentication</SettingTitle>
+                <SettingDescription>Add an extra layer of security to your account</SettingDescription>
+              </SettingLabel>
+              <Toggle
+                checked={twoFactorAuth}
+                onChange={(e) => setTwoFactorAuth(e.target.checked)}
+                aria-label="Two-Factor Authentication"
+              />
+            </SettingRow>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Password</SettingTitle>
+                <SettingDescription>Last changed 30 days ago</SettingDescription>
+              </SettingLabel>
+              <Button variant="outline" size="sm">Change Password</Button>
+            </SettingRow>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>API Keys</SettingTitle>
+                <SettingDescription>Manage your API access tokens</SettingDescription>
+              </SettingLabel>
+              <Button variant="outline" size="sm">Manage Keys</Button>
+            </SettingRow>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Notifications</CardTitle>
+              <CardSubtitle>Configure your notification preferences</CardSubtitle>
+            </div>
+            <Badge variant="accent">Live</Badge>
+          </CardHeader>
+          <CardBody>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Desktop Alerts</SettingTitle>
+                <SettingDescription>Show toast notifications for fills and risk breaches</SettingDescription>
+              </SettingLabel>
+              <Toggle
+                checked={desktopAlerts}
+                onChange={(e) => setDesktopAlerts(e.target.checked)}
+                aria-label="Desktop alerts"
+              />
+            </SettingRow>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Trading Notifications</SettingTitle>
+                <SettingDescription>Get notified about order executions and updates</SettingDescription>
+              </SettingLabel>
+              <Toggle
+                checked={tradingNotifications}
+                onChange={(e) => setTradingNotifications(e.target.checked)}
+                aria-label="Trading notifications"
+              />
+            </SettingRow>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Daily Digest</SettingTitle>
+                <SettingDescription>Receive email summary of P&L and exposures</SettingDescription>
+              </SettingLabel>
+              <Toggle
+                checked={dailyDigest}
+                onChange={(e) => setDailyDigest(e.target.checked)}
+                aria-label="Daily digest"
+              />
+            </SettingRow>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Trading Preferences</CardTitle>
+              <CardSubtitle>Customize your trading experience</CardSubtitle>
+            </div>
+          </CardHeader>
+          <CardBody>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Default Order Type</SettingTitle>
+                <SettingDescription>Market, Limit, or Stop orders</SettingDescription>
+              </SettingLabel>
+              <Button variant="outline" size="sm">Configure</Button>
+            </SettingRow>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Confirm on Submit</SettingTitle>
+                <SettingDescription>Require confirmation before placing orders</SettingDescription>
+              </SettingLabel>
+              <Toggle checked readOnly aria-label="Confirm on submit enabled" />
+            </SettingRow>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Display & Theme</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Theme Mode</SettingTitle>
+                <SettingDescription>Currently using dark theme</SettingDescription>
+              </SettingLabel>
+              <ButtonGroup>
+                <Button variant="outline" size="sm">Light</Button>
+                <Button variant="secondary" size="sm">Dark</Button>
+              </ButtonGroup>
+            </SettingRow>
+            <SettingRow>
+              <SettingLabel>
+                <SettingTitle>Compact Mode</SettingTitle>
+                <SettingDescription>Reduce spacing for more information density</SettingDescription>
+              </SettingLabel>
+              <Toggle checked={false} readOnly aria-label="Compact mode disabled" />
+            </SettingRow>
+          </CardBody>
+        </Card>
+      </Grid>
+    </Page>
+  );
+};
 
 export default SettingsPage;

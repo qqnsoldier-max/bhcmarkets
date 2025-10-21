@@ -1,20 +1,27 @@
 import { NavLink, Outlet } from "react-router-dom";
 import styled from "styled-components";
-import { Badge, Button, MenuLink } from "@repo/ui";
+import { Badge, Button, MenuLink, Divider } from "@repo/ui";
+import { TopBar } from "./TopBar";
 
 const Shell = styled.div`
   min-height: 100vh;
   display: grid;
   grid-template-columns: ${({ theme }) => `${theme.layout.sidebarWidth} minmax(0, 1fr)`};
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "sidebar topbar"
+    "sidebar main";
 `;
 
 const Sidebar = styled.aside`
+  grid-area: sidebar;
   padding: ${({ theme }) => theme.spacing.xl};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xl};
+  gap: ${({ theme }) => theme.spacing.lg};
   border-right: 1px solid ${({ theme }) => theme.colors.border.subtle};
   background: linear-gradient(140deg, rgba(12, 20, 42, 0.95), rgba(9, 14, 34, 0.75));
+  overflow-y: auto;
 `;
 
 const Brand = styled.div`
@@ -64,11 +71,16 @@ const SidebarFooter = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
+const TopBarArea = styled.div`
+  grid-area: topbar;
+`;
+
 const Main = styled.main`
+  grid-area: main;
   padding: ${({ theme }) => theme.spacing.xl};
   background: transparent;
-  border-left: 1px solid ${({ theme }) => theme.colors.border.subtle};
-  overflow: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - ${({ theme }) => theme.layout.topbarHeight});
 `;
 
 const Content = styled.div`
@@ -82,12 +94,39 @@ const Content = styled.div`
 const DASHBOARD_ROOT = "/app" as const;
 
 const menuItems = [
-  { label: "Overview", to: DASHBOARD_ROOT, icon: "🏠" },
-  { label: "Portfolio", to: `${DASHBOARD_ROOT}/portfolio`, icon: "💼" },
-  { label: "Markets", to: `${DASHBOARD_ROOT}/markets`, icon: "📈" },
-  { label: "Orders", to: `${DASHBOARD_ROOT}/orders`, icon: "🧾" },
-  { label: "Settings", to: `${DASHBOARD_ROOT}/settings`, icon: "⚙️" },
+  { label: "Overview", to: DASHBOARD_ROOT, icon: "🏠", tooltip: "Dashboard overview and key metrics" },
+  { label: "Portfolio", to: `${DASHBOARD_ROOT}/portfolio`, icon: "💼", tooltip: "View your portfolio and positions" },
+  { label: "Markets", to: `${DASHBOARD_ROOT}/markets`, icon: "📈", tooltip: "Explore market data and trends" },
+  { label: "Orders", to: `${DASHBOARD_ROOT}/orders`, icon: "🧾", tooltip: "Manage your orders and trades" },
+  { label: "Settings", to: `${DASHBOARD_ROOT}/settings`, icon: "⚙️", tooltip: "Configure platform settings" },
 ] as const;
+
+const QuickLinksSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+const QuickLink = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => theme.spacing.sm};
+  background: transparent;
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-family: ${({ theme }) => theme.typography.fontFamily};
+  font-size: ${({ theme }) => theme.typography.sizes.sm};
+  cursor: pointer;
+  transition: ${({ theme }) => theme.transitions.fast};
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
+`;
 
 export const DashboardShell = () => (
   <Shell>
@@ -98,7 +137,7 @@ export const DashboardShell = () => (
       </Brand>
 
       <div>
-        <SectionLabel>Main</SectionLabel>
+        <SectionLabel>Navigation</SectionLabel>
         <NavSection>
           {menuItems.map((item) => (
             <MenuLink
@@ -108,9 +147,27 @@ export const DashboardShell = () => (
               end={item.to === DASHBOARD_ROOT}
               label={item.label}
               icon={item.icon}
+              title={item.tooltip}
             />
           ))}
         </NavSection>
+      </div>
+
+      <Divider spacing="sm" />
+
+      <div>
+        <SectionLabel>Quick Links</SectionLabel>
+        <QuickLinksSection>
+          <QuickLink>
+            <span>📚</span> Documentation
+          </QuickLink>
+          <QuickLink>
+            <span>🎓</span> Learning Center
+          </QuickLink>
+          <QuickLink>
+            <span>📞</span> Support
+          </QuickLink>
+        </QuickLinksSection>
       </div>
 
       <SidebarFooter>
@@ -118,9 +175,13 @@ export const DashboardShell = () => (
         <p>
           Upgrade your account for deeper analytics, white-labeled reporting, and advanced signals.
         </p>
-        <Button variant="secondary">Upgrade Plan</Button>
+        <Button variant="secondary" size="sm">Upgrade Plan</Button>
       </SidebarFooter>
     </Sidebar>
+
+    <TopBarArea>
+      <TopBar />
+    </TopBarArea>
 
     <Main>
       <Content>
