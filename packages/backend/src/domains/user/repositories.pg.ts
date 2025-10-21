@@ -21,13 +21,20 @@ import type {
 
 type Row = Record<string, unknown>;
 
+const toIsoString = (value: unknown): string => {
+  if (!value) return new Date().toISOString();
+  if (value instanceof Date) return value.toISOString();
+  const parsed = new Date(String(value));
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+};
+
 const mapUser = (r: Row): User => ({
   id: String(r.id),
   email: String(r.email),
   status: r.status as User["status"],
   role: r.role as User["role"],
-  createdAt: String(r.created_at),
-  updatedAt: String(r.updated_at),
+  createdAt: toIsoString(r.created_at),
+  updatedAt: toIsoString(r.updated_at),
 });
 
 const mapCredential = (r: Row): UserCredential => ({
@@ -36,9 +43,9 @@ const mapCredential = (r: Row): UserCredential => ({
   version: Number(r.version ?? 1),
   failedAttemptCount: Number(r.failed_attempt_count ?? 0),
   lockedUntil: r.locked_until ? String(r.locked_until) : undefined,
-  passwordUpdatedAt: String(r.password_updated_at),
-  createdAt: String(r.created_at),
-  updatedAt: String(r.updated_at),
+  passwordUpdatedAt: toIsoString(r.password_updated_at),
+  createdAt: toIsoString(r.created_at),
+  updatedAt: toIsoString(r.updated_at),
 });
 
 const mapSession = (r: Row): UserSession => ({
@@ -50,10 +57,10 @@ const mapSession = (r: Row): UserSession => ({
   status: r.status as UserSession["status"],
   ipAddress: r.ip_address ? String(r.ip_address) : undefined,
   userAgent: r.user_agent ? String(r.user_agent) : undefined,
-  createdAt: String(r.created_at),
-  lastSeenAt: String(r.last_seen_at ?? r.created_at),
-  expiresAt: String(r.expires_at),
-  revokedAt: r.revoked_at ? String(r.revoked_at) : undefined,
+  createdAt: toIsoString(r.created_at),
+  lastSeenAt: toIsoString(r.last_seen_at ?? r.created_at),
+  expiresAt: toIsoString(r.expires_at),
+  revokedAt: r.revoked_at ? toIsoString(r.revoked_at) : undefined,
   revokedReason: r.revoked_reason ? (String(r.revoked_reason) as SessionInvalidationReason) : undefined,
 });
 

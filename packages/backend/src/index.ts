@@ -34,6 +34,18 @@ const logger = {
 const router = async (req: IncomingMessage, res: ServerResponse) => {
   const { method = "GET", url = "/" } = req;
 
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (method === "OPTIONS") {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
+
   // Health & readiness
   if (method === "GET" && url === "/healthz") {
     res.writeHead(200, { "content-type": "application/json" });
